@@ -8,8 +8,13 @@ class ResponseHeadBuilder {
         return result
     }
 
-    fun okStatusHead(): ResponseHeadBuilder {
+    fun okStatus(): ResponseHeadBuilder {
         result += "HTTP/1.1 200 OK\n"
+        return this
+    }
+
+    fun BadRequestStatus(): ResponseHeadBuilder {
+        result += "HTTP/1.1 400 Bad Request\n"
         return this
     }
 

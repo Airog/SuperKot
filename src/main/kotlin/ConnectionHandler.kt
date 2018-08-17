@@ -1,11 +1,9 @@
 import java.io.InputStreamReader
-import java.io.OutputStream
 import java.net.Socket
-import java.nio.charset.Charset
 
 class ConnectionHandler(private val sockConn: Socket) {
 
-    private val writer: OutputStream = sockConn.getOutputStream()
+
     private var running: Boolean = false
 
     fun run() {
@@ -15,14 +13,14 @@ class ConnectionHandler(private val sockConn: Socket) {
 
         var receivedDataString = convertInputDataToString()
 
-        println(receivedDataString)
+//        Logget.logIt(receivedDataString)
 
         when (calculateRequestType(receivedDataString)) {
 
             "GET" ->
-                write(
+                ResponserHttp(sockConn).sendResponse(
                         ResponseHeadBuilder()
-                                .okStatusHead()
+                                .okStatus()
                                 .contentTypeHtmlAndCharsetUtf()
                                 //TODO get the symbol count of HTML file
                                 //.contentLen(110)
@@ -31,18 +29,23 @@ class ConnectionHandler(private val sockConn: Socket) {
                                 + PageGetter().getPageFromFile()
                 )
 
+
 //            "POST" ->
 
-//            else ->
+            //Return 400
+            else ->
+                ResponserHttp(sockConn).sendResponse(
+                        ResponseHeadBuilder()
+                                .BadRequestStatus()
+                                .build()
+                                +
+                                "<HTML><BODY>400 Bad Request</BODY></HTML>")
 
         }
 
-
+        shutdown()
     }
 
-    private fun write(message: String) {
-        writer.write((message + '\n').toByteArray(Charset.defaultCharset()))
-    }
 
     private fun shutdown() {
         running = false
