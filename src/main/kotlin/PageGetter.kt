@@ -5,9 +5,12 @@ class PageGetter {
 
     private val rootPath: String = "D:/rootik/"
 
-    fun getPageFromFile(): String {
-        val inputStream: InputStream = File(rootPath + "index.html").inputStream()
+    fun getPageFromFile(path: String): String {
+        //TODO add file finder method
+        val inputStream: InputStream = File(rootPath + path + ".html").inputStream()
         val inputString = inputStream.bufferedReader().use { it.readText() }
+
+        //do we need to close inputStream or it will be closed automatically?
 
         return inputString
     }

@@ -1,5 +1,7 @@
+import builders.ResponseHeadBuilder
 import java.io.InputStreamReader
 import java.net.Socket
+import parser.ResponceParser
 
 class ConnectionHandler(private val sockConn: Socket) {
 
@@ -13,9 +15,11 @@ class ConnectionHandler(private val sockConn: Socket) {
 
         var receivedDataString = convertInputDataToString()
 
-//        Logget.logIt(receivedDataString)
+        logger.Logger().logIt(receivedDataString)
 
-        when (calculateRequestType(receivedDataString)) {
+        var parsedPack = ResponceParser(receivedDataString)
+
+        when (parsedPack.getRequestType()) {
 
             "GET" ->
                 ResponserHttp(sockConn).sendResponse(
@@ -26,7 +30,7 @@ class ConnectionHandler(private val sockConn: Socket) {
                                 //.contentLen(110)
                                 .connectionClose()
                                 .build()
-                                + PageGetter().getPageFromFile()
+                                + PageGetter().getPageFromFile(parsedPack.getPath())
                 )
 
 
@@ -68,16 +72,6 @@ class ConnectionHandler(private val sockConn: Socket) {
             }
         }
         return buf ?: ""
-    }
-
-    private fun calculateRequestType(receivedStringPack: String): String {
-        if (receivedStringPack == "") {
-            return ""
-        }
-
-        val resultArr: List<String> = receivedStringPack.split(" ")
-        return resultArr.get(0)
-
     }
 
 }
