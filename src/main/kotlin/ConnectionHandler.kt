@@ -2,6 +2,7 @@ import builders.ResponseHeadBuilder
 import java.io.InputStreamReader
 import java.net.Socket
 import parser.ResponceParser
+import request_types.GetHandler
 
 class ConnectionHandler(private val sockConn: Socket) {
 
@@ -14,37 +15,18 @@ class ConnectionHandler(private val sockConn: Socket) {
         print("sockConn connection for '${sockConn.inetAddress.hostAddress}' started\n")
 
         var receivedDataString = convertInputDataToString()
-
         logger.Logger().logIt(receivedDataString)
-
         var parsedPack = ResponceParser(receivedDataString)
 
         when (parsedPack.getRequestType()) {
-
             "GET" ->
-                ResponserHttp(sockConn).sendResponse(
-                        ResponseHeadBuilder()
-                                .okStatus()
-                                .contentTypeHtmlAndCharsetUtf()
-                                //TODO get the symbol count of HTML file
-                                //.contentLen(110)
-                                .connectionClose()
-                                .build()
-                                + PageGetter().getPageFromFile(parsedPack.getPath())
-                )
+                sendResponse(GetHandler(parsedPack).createResponse())
 
+            "POST" ->
+                sendResponse("POST is't working yet")
 
-//            "POST" ->
-
-            //Return 400
             else ->
-                ResponserHttp(sockConn).sendResponse(
-                        ResponseHeadBuilder()
-                                .BadRequestStatus()
-                                .build()
-                                +
-                                "<HTML><BODY>400 Bad Request</BODY></HTML>")
-
+                sendResponse(make400resp())
         }
 
         shutdown()
@@ -72,6 +54,16 @@ class ConnectionHandler(private val sockConn: Socket) {
             }
         }
         return buf ?: ""
+    }
+
+    private fun make400resp() : String {
+        return ResponseHeadBuilder()
+                        .BadRequestStatus()
+                        .build() + "<HTML><BODY>400 Bad Request</BODY></HTML>"
+    }
+
+    private fun sendResponse(resp: String){
+        ResponserHttp(sockConn).sendResponse(resp)
     }
 
 }

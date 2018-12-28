@@ -1,18 +1,35 @@
 package request_types
 
-class GetWorker() {
+import builders.ResponseHeadBuilder
+import parser.ResponceParser
+import PageGetter
+import java.io.FileNotFoundException
 
-    constructor(request: List<String>) : this() {
-        ResponserHttp(sockConn).sendResponse(
-                ResponseHeadBuilder()
-                        .okStatus()
-                        .contentTypeHtmlAndCharsetUtf()
-                        //TODO get the symbol count of HTML file
-                        //.contentLen(110)
-                        .connectionClose()
-                        .build()
-                        + PageGetter().getPageFromFile(parsedPack.getPath())
-        )
+class GetHandler(private val request: ResponceParser) {
+
+    fun createResponse(): String {
+        var fileContent = ""
+        try {
+            fileContent = PageGetter().getPageFromFile(request.getPath())
+        } catch (e: FileNotFoundException) {
+            return make404resp()
+        } finally {
+            println("Some unknown error while reading the file (path: ${request.getPath()}) in GetHandler class")
+        }
+
+        return ResponseHeadBuilder()
+                .okStatus()
+                .contentTypeHtmlAndCharsetUtf()
+                .contentLen(fileContent.length)
+                .connectionClose()
+                .build() + fileContent
     }
 
+    private fun make404resp(): String {
+        return ResponseHeadBuilder()
+                .NotFoundRequestStatus()
+                .contentTypeHtmlAndCharsetUtf()
+                .connectionClose()
+                .build() + "<HTML><BODY>404\nFile not found</BODY></HTML>"
+    }
 }

@@ -20,6 +20,11 @@ class ResponseHeadBuilder {
         return this
     }
 
+    fun NotFoundRequestStatus(): ResponseHeadBuilder {
+        result += "HTTP/1.1 404 Not Found\n"
+        return this
+    }
+
     fun contentTypeHtmlAndCharsetUtf(): ResponseHeadBuilder {
         result += "Content-Type: text/html; charset=utf-8\n"
         return this

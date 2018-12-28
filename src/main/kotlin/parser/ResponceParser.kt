@@ -2,6 +2,7 @@ package parser
 
 class ResponceParser() {
 
+    private var resultArr: List<String> = listOf()
     private var requestType: String = ""
     private var path: String = ""
     private var protocolVersion: String = ""
@@ -11,11 +12,15 @@ class ResponceParser() {
             throw Exception("Error. Package is empty")
         }
 
-        val resultArr: List<String> = receivedStringPack.split(" ")
+        resultArr = receivedStringPack.split(" ")
 
         //TODO add checker for null or empty parameters
         requestType = resultArr.get(0)
         path = resultArr.get(1)
+    }
+
+    fun getAllElements(): List<String>{
+        return resultArr
     }
 
     fun getRequestType(): String {
